@@ -41,7 +41,7 @@ func run(logger *slog.Logger) error {
 
 	srv := &http.Server{
 		Addr:              cfg.Addr,
-		Handler:           api.NewRouter(st, logger),
+		Handler:           api.NewRouter(st, cfg.StreamBaseURL, logger),
 		ReadHeaderTimeout: 5 * time.Second,
 		ReadTimeout:       10 * time.Second,
 		WriteTimeout:      10 * time.Second,

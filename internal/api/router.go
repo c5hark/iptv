@@ -4,15 +4,24 @@ package api
 import (
 	"log/slog"
 	"net/http"
+	"strings"
 
 	"iptv/internal/auth"
 	"iptv/internal/httpx"
+	"iptv/internal/store"
 )
 
 // NewRouter собирает все маршруты. /healthz открыт всем, всё остальное — только после Basic Auth.
-func NewRouter(users auth.Users, logger *slog.Logger) http.Handler {
+func NewRouter(st *store.Store, streamBaseURL string, logger *slog.Logger) http.Handler {
+	channels := &channelsHandler{
+		store:         st,
+		streamBaseURL: strings.TrimRight(streamBaseURL, "/"),
+		logger:        logger,
+	}
+
 	protected := http.NewServeMux()
-	// TODO(шаг 4): здесь появятся GET /api/v1/channels и GET /api/v1/channels/{id}/playback.
+	protected.HandleFunc("GET /api/v1/channels", channels.list)
+	protected.HandleFunc("GET /api/v1/channels/{id}/playback", channels.playback)
 	protected.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		httpx.WriteError(w, http.StatusNotFound, "not_found", "resource not found")
 	})
@@ -21,6 +30,6 @@ func NewRouter(users auth.Users, logger *slog.Logger) http.Handler {
 	root.HandleFunc("GET /healthz", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	})
-	root.Handle("/", auth.Basic(users, logger)(protected))
+	root.Handle("/", auth.Basic(st, logger)(protected))
 	return root
 }
