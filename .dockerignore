@@ -1,0 +1,6 @@
+.git
+.idea
+*.db
+*.db-wal
+*.db-shm
+bin
