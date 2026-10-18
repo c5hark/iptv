@@ -40,7 +40,7 @@ func (s *Store) ListActiveChannels(ctx context.Context) ([]Channel, error) {
 }
 
 // ActiveChannelsByID ищет включенный канал. Если его нет или он выключен, возвращает ErrNotFound
-func (s *Store) ActiveChannelsByID(ctx context.Context, id int64) (Channel, error) {
+func (s *Store) ActiveChannelByID(ctx context.Context, id int64) (Channel, error) {
 	var c Channel
 	err := s.db.QueryRowContext(ctx,
 		`SELECT id, number, name, stream_path, is_active

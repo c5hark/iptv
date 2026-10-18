@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"net/http"
 	"strings"
+	"time"
 
 	"iptv/internal/auth"
 	"iptv/internal/httpx"
@@ -13,9 +14,15 @@ import (
 
 // NewRouter собирает все маршруты. /healthz открыт всем, всё остальное — только после Basic Auth.
 func NewRouter(st *store.Store, streamBaseURL string, logger *slog.Logger) http.Handler {
+	return newRouter(st, streamBaseURL, logger, time.Now)
+}
+
+// newRouter — то же, но с подменяемым источником времени (нужен тестам подписок).
+func newRouter(st *store.Store, streamBaseURL string, logger *slog.Logger, now func() time.Time) http.Handler {
 	channels := &channelsHandler{
 		store:         st,
 		streamBaseURL: strings.TrimRight(streamBaseURL, "/"),
+		now:           now,
 		logger:        logger,
 	}
 
